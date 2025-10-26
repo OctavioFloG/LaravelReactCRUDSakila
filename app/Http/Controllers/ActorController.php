@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Actor;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+
 
 class ActorController extends Controller
 {
@@ -72,16 +74,24 @@ class ActorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $actor = Actor::find($id);
-
         if (!$actor) {
             return response()->json(['message' => 'Actor no encontrado'], 404);
         }
 
-        $actor->delete();
-
-        return response()->json(['message' => 'Actor eliminado']);
+        try {
+            $actor->delete();
+            return response()->json(data: ['message' => 'Actor eliminado correctamente']);
+        } catch (QueryException $e) {
+            if ($e->getCode() == "23000") {
+                return response()->json(data: [
+                    'error' => 'No se puede eliminar el actor',
+                    'detalle' => 'Este actor está vinculado a una o más tablas.'
+                ], status: 409);
+            }
+            throw $e;
+        }
     }
 }

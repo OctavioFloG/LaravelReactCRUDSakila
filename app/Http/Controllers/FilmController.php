@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Film;
+use App\Models\Language;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class FilmController extends Controller
@@ -88,7 +90,18 @@ class FilmController extends Controller
             return response()->json(['message' => 'Película no encontrada'], 404);
         }
 
-        $film->delete();
-        return response()->json(['message' => 'Película eliminada']);
+        
+        try {
+            $film->delete();
+        return response()->json(data: ['message' => 'Película eliminada']);
+        } catch (QueryException $e) {
+            if ($e->getCode() == "23000") {
+                return response()->json(data: [
+                    'error' => 'No se puede eliminar la película',
+                    'detalle' => 'Esta pelicula está vinculado a una o más tablas.'
+                ], status: 409);
+            }
+            throw $e;
+        }
     }
 }
