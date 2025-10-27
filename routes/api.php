@@ -12,4 +12,4 @@ Route::get('/user', function (Request $request) {
 
 Route::apiResource('films', FilmController::class);
 Route::apiResource('actors', ActorController::class);
-Route::apiResource('language', LanguageController::class);
+Route::apiResource('languages', LanguageController::class);
